@@ -8,7 +8,7 @@
 				<![CDATA[
 				<data>
 					<xpath
-						expr="/tree/field[@name=&quot;hours&quot;]" position="after">
+						expr="/tree/field[@name=&quot;work&quot;]" position="after">
 						<field name="billable"/>
 					</xpath>
 				</data>
@@ -22,7 +22,7 @@
 				<![CDATA[
 				<data>
 					<xpath
-						expr="/form/field[@name=&quot;hours&quot;]" position="after">
+						expr="/form/field[@name=&quot;description&quot;]" position="after">
 						<label name="billable"/>
 						<field name="billable"/>
 						<label name="billed"/>

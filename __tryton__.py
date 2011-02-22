@@ -10,6 +10,7 @@
 ''',
     'xml': [
         'line.xml',
+        'work.xml',
     ],
     'depends': [
         'account',
