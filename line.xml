@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<tryton>
+	<data>
+		<record model="ir.ui.view" id="line_view_tree">
+			<field name="model">timesheet.line</field>
+			<field name="inherit" ref="timesheet.line_view_tree"/>
+			<field name="arch" type="xml">
+				<![CDATA[
+				<data>
+					<xpath
+						expr="/tree/field[@name=&quot;hours&quot;]" position="after">
+						<field name="billable"/>
+					</xpath>
+				</data>
+				]]>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="line_view_form">
+			<field name="model">timesheet.line</field>
+			<field name="inherit" ref="timesheet.line_view_form"/>
+			<field name="arch" type="xml">
+				<![CDATA[
+				<data>
+					<xpath
+						expr="/form/field[@name=&quot;hours&quot;]" position="after">
+						<label name="billable"/>
+						<field name="billable"/>
+						<label name="billed"/>
+						<field name="billed"/>
+					</xpath>
+				</data>
+				]]>
+			</field>
+		</record>
+
+	</data>
+</tryton>

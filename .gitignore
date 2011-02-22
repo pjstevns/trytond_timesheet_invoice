@@ -1,0 +1,5 @@
+*.swp
+*.pyc
+*.new
+*.swo
+*egg-info/
