@@ -1,5 +1,7 @@
 
+from trytond.pyson import Eval
 from trytond.model import ModelView, ModelSQL, fields
+from trytond.wizard import Wizard
 import logging
 
 log = logging.getLogger(__name__)
@@ -32,5 +34,57 @@ class Work(ModelSQL, ModelView):
 
 Work()
 
+class InvoiceBillableWorkInit(ModelView):
+    'Select Billable Timesheet lines on Work'
+    _name = 'timesheet.invoice_billable_work.init'
+    _description = __doc__
+
+    work = fields.Many2One('timesheet.work', 'Work', required=True)
+
+    timesheet_lines = fields.One2Many('timesheet.line', 'work', 'Timesheet Lines',
+                                      readonly=True,
+                                      on_change_with=['work']
+                                     )
+
+    def on_change_with_timesheet_lines(self, vals):
+        timesheet_lines_obj = self.pool.get('timesheet.line')
+        lines = timesheet_lines_obj.search([
+            ('work','=',vals.get('work')),
+            ('billable','=',True),
+            ('billed','=',False)
+        ])
+        return lines
+
+InvoiceBillableWorkInit()
+
+class InvoiceBillableWork(Wizard):
+    'Invoice Billable Timesheet lines on Billable Work'
+    _name = 'timesheet.invoice_billable_work'
+    states = {
+        'init': {
+            'result': {
+                'actions': ['_init'],
+                'type': 'form',
+                'object': 'timesheet.invoice_billable_work.init',
+                'state': [
+                    ('end','Cancel','tryton-cancel'),
+                    ('create','Create Invoice', 'tryton-ok', True),
+                ],
+            },
+        },
+        'create': {
+            'actions': ['_create_invoice'],
+            'result': {
+                'type': 'state',
+                'state': 'end',
+            },
+        },
+    }
+
+    def _create_invoice(self, data):
+        log.debug('data: %s' % data)
+        return {}
+
+InvoiceBillableWork()
 
 

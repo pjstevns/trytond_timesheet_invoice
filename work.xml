@@ -32,6 +32,32 @@
 				]]>
 			</field>
 		</record>
+		<record model="ir.ui.view" id="select_billable_timesheet_lines">
+			<field name="model">timesheet.invoice_billable_work.init</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<![CDATA[
+				<form string="Select Billable Timesheet Lines" col="4">
+					<label name="work"/>
+					<field name="work"/>
+					<label name="timesheet_lines"/>
+					<field name="timesheet_lines"/>
+				</form>
+				]]>
+			</field>
+		</record>
+		<record model="ir.action.wizard" id="wizard_invoice_work">
+			<field name="name">Invoice Billable Hours</field>
+			<field name="wiz_name">timesheet.invoice_billable_work</field>
+			<field name="model">timesheet.work</field>
+		</record>
+		<record model="ir.action.keyword" id="wizard_invoice_work_keyword">
+			<field name="keyword">form_action</field>
+			<field name="model">timesheet.work,0</field>
+			<field name="action" ref="wizard_invoice_work"/>
+		</record>
+
+
 
 	</data>
 </tryton>
