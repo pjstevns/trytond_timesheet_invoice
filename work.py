@@ -39,17 +39,36 @@ class InvoiceBillableWorkInit(ModelView):
     _name = 'timesheet.invoice_billable_work.init'
     _description = __doc__
 
-    work = fields.Many2One('timesheet.work', 'Work', required=True)
+    party = fields.Many2One('party.party', 'Party', required=True)
+    work = fields.One2Many('timesheet.work', 'party', 'Work', 
+                           readonly=True,
+                           on_change=['timesheet_lines'],
+                           on_change_with=['party'])
 
     timesheet_lines = fields.One2Many('timesheet.line', 'work', 'Timesheet Lines',
                                       readonly=True,
-                                      on_change_with=['work']
+                                      on_change_with=['work','party']
                                      )
 
+    def on_change_timesheet_lines(self, vals):
+        print vals
+        return []
+
+    def on_change_with_work(self, vals):
+        work_obj = self.pool.get('timesheet.work')
+        project_work_obj = self.pool.get('project.work')
+        work = project_work_obj.search([
+            ('party','=',vals.get('party')),
+        ])
+        return work
+
     def on_change_with_timesheet_lines(self, vals):
+        print "onchange_with", vals
+        work_ids = [ x.get('id') for x in vals.get('work') ]
+        print work_ids
         timesheet_lines_obj = self.pool.get('timesheet.line')
         lines = timesheet_lines_obj.search([
-            ('work','=',vals.get('work')),
+            ('work','in',work_ids),
             ('billable','=',True),
             ('billed','=',False)
         ])
