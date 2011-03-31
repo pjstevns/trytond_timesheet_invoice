@@ -9,7 +9,7 @@
 				<data>
 					<xpath
 						expr="/tree/field[@name=&quot;rec_name&quot;]" position="after">
-						<field name="billable_hours"/>
+						<field name="billable_hours" sum="Hours"/>
 					</xpath>
 				</data>
 				]]>
@@ -32,22 +32,6 @@
 				]]>
 			</field>
 		</record>
-		<record model="ir.ui.view" id="select_billable_timesheet_lines">
-			<field name="model">timesheet.invoice_billable_work.init</field>
-			<field name="type">form</field>
-			<field name="arch" type="xml">
-				<![CDATA[
-				<form string="Select Billable Timesheet Lines" col="2">
-					<label name="party"/>
-					<field name="party"/>
-					<label name="work"/>
-					<field name="work"/>
-					<label name="timesheet_lines"/>
-					<field name="timesheet_lines"/>
-				</form>
-				]]>
-			</field>
-		</record>
 		<record model="ir.action.wizard" id="wizard_invoice_work">
 			<field name="name">Invoice Billable Hours</field>
 			<field name="wiz_name">timesheet.invoice_billable_work</field>
@@ -58,8 +42,6 @@
 			<field name="model">timesheet.work,0</field>
 			<field name="action" ref="wizard_invoice_work"/>
 		</record>
-
-
 
 	</data>
 </tryton>

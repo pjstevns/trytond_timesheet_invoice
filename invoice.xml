@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<tryton>
+	<data>
+		<record model="ir.ui.view" id="invoice_line_view_form">
+			<field name="model">account.invoice.line</field>
+			<field name="inherit" ref="account_invoice.invoice_line_view_form"/>
+			<field name="arch" type="xml">
+				<![CDATA[
+				<data>
+					<xpath
+						expr="/form/notebook/page[@id=&quot;general&quot;]" position="after">
+						<page string="Timesheet" col="4" id="timesheet_lines">
+							<field name="timesheet_lines"/>
+						</page>
+					</xpath>
+				</data>
+				]]>
+			</field>
+		</record>
+	</data>
+</tryton>

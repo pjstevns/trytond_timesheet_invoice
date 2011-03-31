@@ -11,6 +11,7 @@
     'xml': [
         'line.xml',
         'work.xml',
+        'invoice.xml',
     ],
     'depends': [
         'account',
