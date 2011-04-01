@@ -108,6 +108,12 @@ class InvoiceBillableWork(Wizard):
         log.debug("invoice: %s", invoice)
 
         for (work, product) in data:
+            if not work.billable_hours > 0:
+                continue
+
+            if not work.timesheet_lines:
+                continue
+
             log.debug("work, product: (%s, %s)" % (work, product))
             quantity = work.billable_hours
             unit_price = work.list_price or product.list_price
