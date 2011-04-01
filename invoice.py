@@ -10,7 +10,6 @@ class Invoice(ModelSQL, ModelView):
 
     def writeoff_timesheet(self, ids, trigger_id):
         """ set timesheet lines on all invoice lines to state:billed"""
-        log.debug("writeoff_timesheet %s %s" % (ids, trigger_id))
         invoice_obj = self.pool.get('account.invoice')
         invoice_line_obj = self.pool.get('account.invoice.line')
         timesheet_line_obj = self.pool.get('timesheet.line')
@@ -20,7 +19,6 @@ class Invoice(ModelSQL, ModelView):
             for invoice_line in invoice.lines:
                 for timesheet_line in invoice_line.timesheet_lines:
                     timesheet_line_obj.write(timesheet_line.id, {'billed': True})
-                    log.debug("timesheet_line: %s" % timesheet_line)
         return
 
 Invoice()

@@ -77,6 +77,10 @@ class InvoiceBillableWork(Wizard):
     def _build_invoice(self, party_id, data):
         if len(data) < 1: return None
 
+        config_obj = self.pool.get('timesheet_invoice.configuration')
+        config = config_obj.browse(1)
+        description = config.description
+
         party_obj = self.pool.get('party.party')
         journal_obj = self.pool.get('account.journal')
         invoice_obj = self.pool.get('account.invoice')
@@ -90,7 +94,7 @@ class InvoiceBillableWork(Wizard):
         invoice_id = invoice_obj.create(dict(
             company = company,
             type = 'out_invoice',
-            description = 'Test Invoice',
+            description = description,
             state = 'draft',
             currency = company.currency.id,
             journal = journal,
@@ -114,7 +118,7 @@ class InvoiceBillableWork(Wizard):
                 type='line',
                 product=product.id,
                 invoice = invoice.id,
-                description = "%s %s" % (work.name, product.name),
+                description = "[%s] %s" % (product.name, work.name),
                 quantity = work.billable_hours,
                 unit = product.default_uom.id,
                 unit_price = unit_price,
