@@ -28,8 +28,8 @@ Invoice()
 class InvoiceLine(ModelSQL, ModelView):
     """Invoice Line"""
     _name = 'account.invoice.line'
-    timesheet_lines = fields.One2Many('timesheet.line', 'invoice_line',
-                                      'Timesheet Lines')
+    timesheet_lines = fields.Many2Many('account_invoice_line-timesheet_line',
+                                      'invoice_line', 'timesheet_line', 'Timesheet Lines')
 
     # add timesheet_lines to on_change_with list on parent
     quantity = fields.Float('Quantity',
@@ -60,6 +60,16 @@ class InvoiceLine(ModelSQL, ModelView):
         return hours
 
 InvoiceLine()
+
+class InvoiceLineTimesheetLine(ModelSQL, ModelView):
+    """ many2many relation for timesheet_line and invoice_line """
+    _name = 'account_invoice_line-timesheet_line'
+    _description = __doc__
+
+    timesheet_line = fields.Many2One('timesheet.line', 'Timesheet Line')
+    invoice_line = fields.Many2One('account.invoice.line', 'Invoice Line')
+
+InvoiceLineTimesheetLine()
 
 class Line(ModelSQL, ModelView):                                                                                                                                              
     """Timesheet Line"""

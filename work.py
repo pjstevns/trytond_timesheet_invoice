@@ -53,7 +53,6 @@ class InvoiceBillableWork(Wizard):
         works = work_obj.browse(data.get('ids'))
         invoicedata = {}
         for work in works:
-            log.debug('work: %s' % work)
             work_party = self._get_party(work)
             work_product = self._get_product(work)
 
@@ -69,11 +68,6 @@ class InvoiceBillableWork(Wizard):
 
             invoicedata[work_party.id].append((work, work_product))
 
-            log.debug('party: %s' % work_party.name)
-            log.debug('product: %s' % work_product.name)
-
-        log.debug("invoices: %s" % invoicedata)
-    
         for (party_id, data) in invoicedata.items():
             self._build_invoice(party_id, data)
 
