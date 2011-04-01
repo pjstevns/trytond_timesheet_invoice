@@ -88,7 +88,7 @@ class InvoiceBillableWork(Wizard):
 
         party = party_obj.browse([party_id,])[0]
         company = data[0][0].company
-        journal = journal_obj.search(['code','=','DEB'])[0]
+        journal = journal_obj.search([('type','=','revenue')], limit=1)[0]
         invoice_date = datetime.date.today()
 
         invoice_id = invoice_obj.create(dict(
