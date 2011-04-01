@@ -17,5 +17,13 @@
 				]]>
 			</field>
 		</record>
+		<record model="ir.trigger" id="invoice_open_trigger">
+			<field name="name">Open Invoice</field>   
+			<field name="model" search="[('model','=','account.invoice')]"/>
+			<field name="on_write">True</field>
+			<field name="condition">self.state == 'open'</field>
+			<field name="action_model" search="[('model','=','account.invoice')]"/>
+			<field name="action_function">writeoff_timesheet</field>
+		</record>                      
 	</data>
 </tryton>

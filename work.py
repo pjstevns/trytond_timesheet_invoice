@@ -4,8 +4,6 @@ from trytond.wizard import Wizard
 import logging
 import datetime
 
-from trytond.pyson import Eval, Not, Equal
-
 log = logging.getLogger(__name__)
 
 class Work(ModelSQL, ModelView):
@@ -35,36 +33,6 @@ class Work(ModelSQL, ModelView):
         return res
 
 Work()
-
-class InvoiceLine(ModelSQL, ModelView):
-    """Invoice Line"""
-    _name = 'account.invoice.line'
-    timesheet_lines = fields.One2Many('timesheet.line', 'invoice_line',
-                                      'Timesheet Lines')
-
-    quantity = fields.Float('Quantity',
-                            digits=(16, Eval('unit_digits', 2)),
-                            states={
-                                'invisible': Not(Equal(Eval('type'), 'line')),
-                                'required': Equal(Eval('type'), 'line'),
-                            }, on_change_with=['timesheet_lines'])
-
-    def on_change_with_quantity(self, vals):
-        hours = 0.0
-        for line in vals.get('timesheet_lines'):
-            hours = hours + line.get('hours')
-        return hours
-
-InvoiceLine()
-
-class Line(ModelSQL, ModelView):                                                                                                                                              
-    """Timesheet Line"""
-    _name = 'timesheet.line'
-    invoice_line = fields.Many2One('account.invoice.line', 'Invoice Line',
-                                  readonly=True)
-
-Line()
-
 
 class InvoiceBillableWork(Wizard):
     'Invoice Billable Timesheet lines on Billable Work'

@@ -10,6 +10,7 @@
 					<xpath
 						expr="/tree/field[@name=&quot;description&quot;]" position="after">
 						<field name="billable"/>
+						<field name="billed"/>
 					</xpath>
 				</data>
 				]]>
