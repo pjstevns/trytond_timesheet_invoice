@@ -69,12 +69,3 @@ class InvoiceLineTimesheetLine(ModelSQL, ModelView):
 
 InvoiceLineTimesheetLine()
 
-class Line(ModelSQL, ModelView):                                                                                                                                              
-    """Timesheet Line"""
-    _name = 'timesheet.line'
-    invoice_line = fields.Many2One('account.invoice.line', 'Invoice Line',
-                                  readonly=True)
-
-Line()
-
-
