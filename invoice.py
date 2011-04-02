@@ -26,8 +26,22 @@ Invoice()
 class InvoiceLine(ModelSQL, ModelView):
     """Invoice Line"""
     _name = 'account.invoice.line'
-    timesheet_lines = fields.Many2Many('account_invoice_line-timesheet_line',
-                                      'invoice_line', 'timesheet_line', 'Timesheet Lines')
+
+    work = fields.Many2One('timesheet.work','Work')
+    timesheet_lines = fields.One2Many(
+        'timesheet.line', 
+        'invoice_line',
+        'Timesheet Lines',
+        add_remove = [
+            ('invoice_line','=',False),
+            ('work','=',Eval('work')),
+            ('billable','=',True),
+            ('hours','>',0),
+        ],
+    )
+
+#    timesheet_lines = fields.Many2Many('account_invoice_line-timesheet_line',
+#                                      'invoice_line', 'timesheet_line', 'Timesheet Lines')
 
     # add timesheet_lines to on_change_with list on parent
     quantity = fields.Float('Quantity',
@@ -59,6 +73,19 @@ class InvoiceLine(ModelSQL, ModelView):
 
 InvoiceLine()
 
+# o2m target
+class Line(ModelSQL, ModelView):
+    """Timesheet Line"""
+    _name = 'timesheet.line'
+    invoice_line = fields.Many2One(
+        'account.invoice.line', 
+        'Invoice Line',
+        readonly=True
+    )
+Line()
+
+
+# deprecated storage using m2m
 class InvoiceLineTimesheetLine(ModelSQL, ModelView):
     """ many2many relation for timesheet_line and invoice_line """
     _name = 'account_invoice_line-timesheet_line'
@@ -68,13 +95,4 @@ class InvoiceLineTimesheetLine(ModelSQL, ModelView):
     invoice_line = fields.Many2One('account.invoice.line', 'Invoice Line')
 
 InvoiceLineTimesheetLine()
-
-class Line(ModelSQL, ModelView):                                                                                                                                              
-    """Timesheet Line"""
-    _name = 'timesheet.line'
-    invoice_line = fields.Many2One('account.invoice.line', 'Invoice Line',
-                                  readonly=True)
-
-Line()
-
 

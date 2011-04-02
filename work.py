@@ -10,10 +10,12 @@ class Work(ModelSQL, ModelView):
     'Work'
     _name = 'timesheet.work'
     _description = __doc__
-
+    
     billable = fields.Boolean('Billable')
-    billable_hours = fields.Function(fields.Float('Billable Hours'),
-                                     'get_billable_hours')
+    billable_hours = fields.Function(
+        fields.Float('Billable Hours'),
+        'get_billable_hours'
+    )
 
     def _billable_hours(self, work):
         hours = 0.0
@@ -105,13 +107,15 @@ class InvoiceBillableWork(Wizard):
             invoice_date=invoice_date,
         ))
         invoice = invoice_obj.browse([invoice_id])[0]
-        log.debug("invoice: %s", invoice)
+        log.debug("invoice: %s, data: %s" %( invoice, data))
 
         for (work, product) in data:
             if not work.billable_hours > 0:
+                log.debug("skip %s" % work)
                 continue
 
             if not work.timesheet_lines:
+                log.debug("skip %s" % work)
                 continue
 
             log.debug("work, product: (%s, %s)" % (work, product))
