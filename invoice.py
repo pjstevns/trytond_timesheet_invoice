@@ -1,6 +1,7 @@
 from trytond.model import ModelView, ModelSQL, fields
 import logging
 from trytond.pyson import Eval, Not, Equal, Get, In
+from trytond.transaction import Transaction
 
 log = logging.getLogger(__name__)
 
@@ -40,8 +41,6 @@ class InvoiceLine(ModelSQL, ModelView):
         ],
     )
 
-#    timesheet_lines = fields.Many2Many('account_invoice_line-timesheet_line',
-#                                      'invoice_line', 'timesheet_line', 'Timesheet Lines')
 
     # add timesheet_lines to on_change_with list on parent
     quantity = fields.Float('Quantity',
@@ -64,6 +63,26 @@ class InvoiceLine(ModelSQL, ModelView):
                                                 'currency','timesheet_lines',
                                             ]),
                              'get_amount')
+
+    def init(self, module_name):
+        super(InvoiceLine, self).init(module_name)
+        timesheet_line_obj = self.pool.get('timesheet.line')
+        m2m_obj = self.pool.get('account_invoice_line-timesheet_line')
+        lines = m2m_obj.search([('invoice_line','>','0')])
+        m2m = m2m_obj.browse(lines)
+        tuples = []
+        for line in m2m:
+            tuples.append((line.timesheet_line.id,line.invoice_line.id))
+
+        cursor = Transaction().cursor
+        for tpl in tuples:
+            cursor.execute("""
+                           UPDATE timesheet_line 
+                           SET invoice_line = %d 
+                           WHERE id = %d
+                           """ % (tpl[1], tpl[0]))
+        m2m_obj.delete(lines)
+                           
 
     def on_change_with_quantity(self, vals):
         hours = 0.0
