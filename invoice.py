@@ -1,5 +1,7 @@
-from trytond.model import ModelView, ModelSQL, fields
+
 import logging
+
+from trytond.model import ModelView, ModelSQL, fields
 from trytond.pyson import Eval, Not, Equal, Get, In
 from trytond.transaction import Transaction
 

@@ -13,6 +13,7 @@
         'work.xml',
         'invoice.xml',
         'configuration.xml',
+        'report.xml',
     ],
     'depends': [
         'account',
