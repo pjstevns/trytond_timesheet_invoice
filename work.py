@@ -52,7 +52,8 @@ class InvoiceBillableWork(Wizard):
     def _create_invoice(self, data):
         log.debug('data: %s' % data)
         work_obj = self.pool.get('project.work')
-        works = work_obj.browse(data.get('ids'))
+        work_ids = work_obj.search([('work','in',data.get('ids'))])
+        works = work_obj.browse(work_ids)
         invoicedata = {}
         for work in works:
             work_party = self._get_party(work)
