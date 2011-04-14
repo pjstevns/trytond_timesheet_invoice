@@ -2,44 +2,76 @@
 <tryton>
 	<data>
 		<record model="ir.ui.view" id="work_view_tree">
-			<field name="model">timesheet.work</field>
-			<field name="inherit" ref="timesheet.work_view_tree"/>
+			<field name="model">project.work</field>
+			<field name="inherit" ref="project.work_view_tree"/>
 			<field name="arch" type="xml">
 				<![CDATA[
 				<data>
 					<xpath
-						expr="/tree/field[@name=&quot;rec_name&quot;]" position="after">
+						expr="/tree/field[@name=&quot;cost&quot;]" position="after">
 						<field name="billable_hours" sum="Hours"/>
 					</xpath>
 				</data>
 				]]>
 			</field>
 		</record>
-		<record model="ir.ui.view" id="work_view_form">
-			<field name="model">timesheet.work</field>
-			<field name="inherit" ref="timesheet.work_view_form"/>
+		<record model="ir.ui.view" id="work_view_tree2">
+			<field name="model">project.work</field>
+			<field name="inherit" ref="project.work_view_tree2"/>
 			<field name="arch" type="xml">
 				<![CDATA[
 				<data>
 					<xpath
-						expr="/form/field[@name=&quot;company&quot;]" position="after">
-						<label name="billable"/>
-						<field name="billable"/>
-						<label name="billable_hours"/>
-						<field name="billable_hours"/>
+						expr="/tree/field[@name=&quot;cost&quot;]" position="after">
+						<field name="billable_hours" sum="Hours"/>
 					</xpath>
 				</data>
 				]]>
 			</field>
 		</record>
+		<record model="ir.ui.view" id="work_view_tree3">
+			<field name="model">project.work</field>
+			<field name="inherit" ref="project.work_view_tree3"/>
+			<field name="arch" type="xml">
+				<![CDATA[
+				<data>
+					<xpath
+						expr="/tree/field[@name=&quot;cost&quot;]" position="after">
+						<field name="billable_hours" sum="Hours"/>
+					</xpath>
+				</data>
+				]]>
+			</field>
+		</record>
+	
+		<record model="ir.ui.view" id="work_view_form">
+			<field name="model">project.work</field>
+			<field name="inherit" ref="project.work_view_form"/>
+			<field name="arch" type="xml">
+				<![CDATA[
+				<data>
+					<xpath expr="/form/label[@name=&quot;company&quot;]" position="replace"/>
+					<xpath expr="/form/field[@name=&quot;company&quot;]" position="replace">
+						<label name="company"/>
+						<field name="company" colspan="3"/>
+						<label name="billable_hours"/>
+						<field name="billable_hours"/>
+						<label name="billable"/>
+						<field name="billable"/>
+					</xpath>
+				</data>
+				]]>
+			</field>
+		</record>
+
 		<record model="ir.action.wizard" id="wizard_invoice_work">
 			<field name="name">Invoice Billable Hours</field>
-			<field name="wiz_name">timesheet.invoice_billable_work</field>
-			<field name="model">timesheet.work</field>
+			<field name="wiz_name">project.invoice_billable_work</field>
+			<field name="model">project.work</field>
 		</record>
 		<record model="ir.action.keyword" id="wizard_invoice_work_keyword">
 			<field name="keyword">form_action</field>
-			<field name="model">timesheet.work,0</field>
+			<field name="model">project.work,0</field>
 			<field name="action" ref="wizard_invoice_work"/>
 		</record>
 

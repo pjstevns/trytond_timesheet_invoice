@@ -22,5 +22,7 @@
         'company',
         'currency',
         'timesheet',
+        'project',
+        'project_revenue',
     ],
 }

@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 class Work(ModelSQL, ModelView):
     'Work'
-    _name = 'timesheet.work'
+    _name = 'project.work'
     _description = __doc__
     
     billable = fields.Boolean('Billable')
@@ -20,7 +20,7 @@ class Work(ModelSQL, ModelView):
     def _billable_hours(self, work):
         hours = 0.0
         line_obj = self.pool.get('timesheet.line')
-        line_ids = line_obj.search([('work','=',work.id),('billable','=',True),('billed','=',False)])
+        line_ids = line_obj.search([('work','=',work.work),('billable','=',True),('billed','=',False)])
         for line in line_obj.browse(line_ids):
             hours += line.hours
         for child in work.children:
@@ -31,14 +31,13 @@ class Work(ModelSQL, ModelView):
         res = {}
         for work in self.browse(ids):
             res[work.id] = self._billable_hours(work)
-
         return res
 
 Work()
 
 class InvoiceBillableWork(Wizard):
     'Invoice Billable Timesheet lines on Billable Work'
-    _name = 'timesheet.invoice_billable_work'
+    _name = 'project.invoice_billable_work'
     states = {
         'init': {
             'result': {
@@ -52,8 +51,7 @@ class InvoiceBillableWork(Wizard):
     def _create_invoice(self, data):
         log.debug('data: %s' % data)
         work_obj = self.pool.get('project.work')
-        work_ids = work_obj.search([('work','in',data.get('ids'))])
-        works = work_obj.browse(work_ids)
+        works = work_obj.browse(data.get('ids'))
         invoicedata = {}
         for work in works:
             work_party = self._get_party(work)
@@ -78,6 +76,7 @@ class InvoiceBillableWork(Wizard):
 
 
     def _build_invoice(self, party_id, data):
+        log.debug('party_id: %s data: %s' %(party_id, data))
         if len(data) < 1: return None
 
         config_obj = self.pool.get('timesheet_invoice.configuration')
