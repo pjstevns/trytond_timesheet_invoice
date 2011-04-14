@@ -12,8 +12,9 @@ class Line(ModelSQL, ModelView):
     billed = fields.Boolean('Billed', readonly=True)
 
     def on_change_with_billable(self, vals):
-        work_obj = self.pool.get('timesheet.work')
-        work = work_obj.browse([vals.get('work')])[0]
+        work_obj = self.pool.get('project.work')
+        work_ids = work_obj.search([('work','=',vals.get('work'))])
+        work = work_obj.browse(work_ids)[0]
         return work.billable
 
 
