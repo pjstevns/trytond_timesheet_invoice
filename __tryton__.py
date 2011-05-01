@@ -2,7 +2,7 @@
 #this repository contains the full copyright notices and license terms.
 {
     'name': 'Invoicing of Timesheets',
-    'version': '2.1.0',
+    'version': '2.0.0',
     'author': 'NFG',
     'email': 'info@nfg.nl',
     'website': 'http://www.nfg.nl/',
