@@ -3,6 +3,7 @@ from trytond.model import ModelView, ModelSQL, fields
 from trytond.wizard import Wizard
 import logging
 import datetime
+import copy
 
 log = logging.getLogger(__name__)
 
@@ -12,6 +13,7 @@ class TimesheetWork(ModelSQL, ModelView):
     def get_rec_name(self, ids, name):
         if not ids:
             return {}
+        log.debug("get_rec_name: %s %s %s" %(self, ids, name))
         res = {}
         def _name(work):
             if work.parent:
@@ -19,17 +21,38 @@ class TimesheetWork(ModelSQL, ModelView):
             else:
                 return work.name
 
+        missing = copy.copy(ids)
         pw_obj = self.pool.get('project.work')
-        pw_ids = pw_obj.search([('work','in',ids)])
-        for work in pw_obj.browse(pw_ids):
-            res[work.work.id] = _name(work)
+        # FIXME: this is just too butt-ugly 
+        # ids appear to be context dependent 
 
-        missing = []
-        for id in ids:
-            if res.get(id): continue
-            missing.append(id)
-        for work in self.browse(missing):
-            res[work.id] = _name(work)
+        try: # lookup project.work.work
+            pw_ids = pw_obj.search([('work','in',ids)])
+            for work in pw_obj.browse(pw_ids):
+                res[work.work.id] = _name(work)
+                missing.remove(work.work.id)
+        except:
+            pass
+
+        try: # lookup timesheet.work.id
+            for work in self.browse(missing):
+                res[work.id] = _name(work)
+                missing.remove(work.id)
+        except:
+            pass
+
+        try: # lookup project.work.id
+            for work in pw_obj.browse(missing):
+                res[work.id] = _name(work)
+                missing.remove(work.id)
+        except:
+            pass
+
+        if missing:
+            log.warning("failed to lookup res_name for works [%s]" % missing)
+            for id in missing:
+                res[id] = "Error in res_name lookup"
+
 
         return res
 
