@@ -7,36 +7,52 @@
 			<field name="arch" type="xml">
 				<![CDATA[
 				<data>
-					<xpath
-						expr="/tree/field[@name=&quot;cost&quot;]" position="after">
+					<xpath expr="/tree/field[@name=&quot;total_effort&quot;]" position="after">
 						<field name="billable_hours" sum="Hours"/>
 					</xpath>
 				</data>
 				]]>
 			</field>
 		</record>
-		<record model="ir.ui.view" id="work_view_tree2">
+		<record model="ir.ui.view" id="work_view_list">
 			<field name="model">project.work</field>
-			<field name="inherit" ref="project.work_view_tree2"/>
+			<field name="inherit" ref="project.work_view_list"/>
 			<field name="arch" type="xml">
 				<![CDATA[
 				<data>
-					<xpath
-						expr="/tree/field[@name=&quot;cost&quot;]" position="after">
+					<xpath expr="/tree/field[@name=&quot;name&quot;]" position="replace">
+						<field name="rec_name"/>
+					</xpath>
+					<xpath expr="/tree/field[@name=&quot;total_effort&quot;]" position="after">
 						<field name="billable_hours" sum="Hours"/>
 					</xpath>
 				</data>
 				]]>
 			</field>
 		</record>
-		<record model="ir.ui.view" id="work_view_tree3">
+		<record model="ir.ui.view" id="work_view_list2">
 			<field name="model">project.work</field>
-			<field name="inherit" ref="project.work_view_tree3"/>
+			<field name="inherit" ref="project.work_view_list2"/>
 			<field name="arch" type="xml">
 				<![CDATA[
 				<data>
-					<xpath
-						expr="/tree/field[@name=&quot;cost&quot;]" position="after">
+					<xpath expr="/tree/field[@name=&quot;name&quot;]" position="replace">
+						<field name="rec_name"/>
+					</xpath>
+					<xpath expr="/tree/field[@name=&quot;total_effort&quot;]" position="after">
+						<field name="billable_hours" sum="Hours"/>
+					</xpath>
+				</data>
+				]]>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="work_view_list3">
+			<field name="model">project.work</field>
+			<field name="inherit" ref="project.work_view_list3"/>
+			<field name="arch" type="xml">
+				<![CDATA[
+				<data>
+					<xpath expr="/tree/field[@name=&quot;total_effort&quot;]" position="after">
 						<field name="billable_hours" sum="Hours"/>
 					</xpath>
 				</data>
