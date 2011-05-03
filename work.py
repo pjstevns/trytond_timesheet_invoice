@@ -6,6 +6,38 @@ import datetime
 
 log = logging.getLogger(__name__)
 
+class TimesheetWork(ModelSQL, ModelView):
+    _name = 'timesheet.work'
+
+    def get_rec_name(self, ids, name):
+        if not ids:
+            return {}
+        res = {}
+        def _name(work):
+            if work.parent:
+                return "%s\%s" % (_name(work.parent), work.name)
+            else:
+                return work.name
+
+        pw_obj = self.pool.get('project.work')
+        pw_ids = pw_obj.search([('work','in',ids)])
+        for work in pw_obj.browse(pw_ids):
+            res[work.work.id] = _name(work)
+
+        missing = []
+        for id in ids:
+            if res.get(id): continue
+            missing.append(id)
+        for work in self.browse(missing):
+            res[work.id] = _name(work)
+
+        return res
+
+
+TimesheetWork()
+
+
+
 class Work(ModelSQL, ModelView):
     'Work'
     _name = 'project.work'
@@ -31,6 +63,19 @@ class Work(ModelSQL, ModelView):
         res = {}
         for work in self.browse(ids):
             res[work.id] = self._billable_hours(work)
+        return res
+
+    def get_rec_name(self, ids, name):
+        if not ids:
+            return {}
+        res = {}
+        def _name(work):
+            if work.parent:
+                return "%s\%s" % (_name(work.parent), work.name)
+            else:
+                return work.name
+        for work in self.browse(ids):
+            res[work.id] = _name(work.work)
         return res
 
 Work()
