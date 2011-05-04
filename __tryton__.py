@@ -5,7 +5,7 @@
     'version': '2.0.0',
     'author': 'NFG',
     'email': 'info@nfg.nl',
-    'website': 'http://www.nfg.nl/',
+    'website': 'http://www.tryton.org/',
     'description': '''Support creation of invoices based on timesheets.
 ''',
     'xml': [
