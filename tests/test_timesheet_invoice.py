@@ -9,9 +9,10 @@ if os.path.isdir(DIR):
     sys.path.insert(0, os.path.dirname(DIR))
 
 import unittest
+import doctest
 import trytond.tests.test_tryton
 from trytond.tests.test_tryton import test_view
-
+from trytond.backend.sqlite.database import Database as SQLiteDatabase
 
 class TimesheetInvoiceTestCase(unittest.TestCase):
     '''
@@ -25,12 +26,29 @@ class TimesheetInvoiceTestCase(unittest.TestCase):
         '''
         Test views.
         '''
-        test_view('contract')
+        test_view('timesheet_invoice')
+
+
+def doctest_dropdb(test):
+    '''
+    Remote sqlite memory database
+    '''
+    database = SQLiteDatabase().connect()
+    cursor = database.cursor(autocommit=True)
+    try:
+        database.drop(cursor, ':memory:')
+        cursor.commit()
+    finally:
+        cursor.close()
 
 def suite():
     suite = trytond.tests.test_tryton.suite()
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(
         TimesheetInvoiceTestCase))
+    suite.addTest(doctest.DocFileSuite('scenario_timesheet_invoice.rst',
+                                      setUp=doctest_dropdb,
+                                      tearDown=doctest_dropdb,
+                                      encoding='utf-8'))
     return suite
 
 if __name__ == '__main__':

@@ -1,69 +1,46 @@
 
 from trytond.model import ModelView, ModelSQL, fields
 from trytond.wizard import Wizard
+from trytond.transaction import Transaction
+from trytond.backend import TableHandler
 import logging
 import datetime
-import copy
 
 log = logging.getLogger(__name__)
 
-class TimesheetWork(ModelSQL, ModelView):
-    _name = 'timesheet.work'
+class ProjectWork(ModelSQL, ModelView):
+    'Work'
+    _name = 'project.work'
+    _description = __doc__
+
+    def init(self, module_name):
+        super(ProjectWork, self).init(module_name)
+        cursor = Transaction().cursor
+        table = TableHandler(cursor, self, module_name)
+        log.debug(table)
+        if table.column_exist('billable'):
+            log.debug("drop billable from table")
+            table.drop_column('billable', exception=True)
 
     def get_rec_name(self, ids, name):
         if not ids:
             return {}
-        log.debug("get_rec_name: %s %s %s" %(self, ids, name))
         res = {}
         def _name(work):
             if work.parent:
-                return "%s\%s" % (_name(work.parent), work.name)
+                return _name(work.parent) + '\\' + work.name
             else:
                 return work.name
-
-        missing = copy.copy(ids)
-        pw_obj = self.pool.get('project.work')
-        # FIXME: this is just too butt-ugly 
-        # ids appear to be context dependent 
-
-        try: # lookup project.work.work
-            pw_ids = pw_obj.search([('work','in',ids)])
-            for work in pw_obj.browse(pw_ids):
-                res[work.work.id] = _name(work)
-                missing.remove(work.work.id)
-        except:
-            pass
-
-        try: # lookup timesheet.work.id
-            for work in self.browse(missing):
-                res[work.id] = _name(work)
-                missing.remove(work.id)
-        except:
-            pass
-
-        try: # lookup project.work.id
-            for work in pw_obj.browse(missing):
-                res[work.id] = _name(work)
-                missing.remove(work.id)
-        except:
-            pass
-
-        if missing:
-            log.warning("failed to lookup res_name for works [%s]" % missing)
-            for id in missing:
-                res[id] = "Error in res_name lookup"
-
-
+        for work in self.browse(ids):
+            res[work.id] = _name(work)
         return res
 
 
-TimesheetWork()
-
-
+ProjectWork()
 
 class Work(ModelSQL, ModelView):
     'Work'
-    _name = 'project.work'
+    _name = 'timesheet.work'
     _description = __doc__
     
     billable = fields.Boolean('Billable')
@@ -72,11 +49,15 @@ class Work(ModelSQL, ModelView):
         'get_billable_hours'
     )
 
+    def get_billable_timesheet_lines(self, ids):
+        res = {}
+        line_obj = self.pool.get('timesheet.line')
+        line_ids = line_obj.search([('work','in',ids),('billable','=',True),('billed','=',False)])
+        return line_obj.browse(line_ids)
+
     def _billable_hours(self, work):
         hours = 0.0
-        line_obj = self.pool.get('timesheet.line')
-        line_ids = line_obj.search([('work','=',work.work),('billable','=',True),('billed','=',False)])
-        for line in line_obj.browse(line_ids):
+        for line in self.get_billable_timesheet_lines([work.id]):
             hours += line.hours
         for child in work.children:
             hours += self._billable_hours(child)
@@ -86,19 +67,6 @@ class Work(ModelSQL, ModelView):
         res = {}
         for work in self.browse(ids):
             res[work.id] = self._billable_hours(work)
-        return res
-
-    def get_rec_name(self, ids, name):
-        if not ids:
-            return {}
-        res = {}
-        def _name(work):
-            if work.parent:
-                return "%s\%s" % (_name(work.parent), work.name)
-            else:
-                return work.name
-        for work in self.browse(ids):
-            res[work.id] = _name(work.work)
         return res
 
 Work()
@@ -117,31 +85,35 @@ class InvoiceBillableWork(Wizard):
     }
 
     def _create_invoice(self, data):
-        log.debug('data: %s' % data)
-        work_obj = self.pool.get('project.work')
-        works = work_obj.browse(data.get('ids'))
+        pw_obj = self.pool.get('project.work')
         invoicedata = {}
-        for work in works:
-            work_party = self._get_party(work)
-            work_product = self._get_product(work)
+        works = pw_obj.browse(data.get('ids'))
+        # find all children
+        def _descend(works):
+            children = []
+            for work in works:
+                if work.children:
+                    children = children + _descend(work.children)
+                else:
+                    children.append(work)
+            return list(set(children))
 
-            if not work_party:
+        for work in _descend(works):
+            party = self._get_party(work)
+            product = self._get_product(work)
+
+            if not party:
                 log.warning("unable to find party for work: %s" % work)
                 continue
-            if not work_product:
+            if not product:
                 log.warning("unable to find product for work: %s" % work)
                 continue
-
-            if not invoicedata.get(work_party.id):
-                invoicedata[work_party.id] = []
-
-            invoicedata[work_party.id].append((work, work_product))
-
+            if not invoicedata.get(party.id):
+                invoicedata[party.id] = []
+            invoicedata[party.id].append((work, product))
         for (party_id, data) in invoicedata.items():
             self._build_invoice(party_id, data)
-
         return {}
-
 
     def _build_invoice(self, party_id, data):
         log.debug('party_id: %s data: %s' %(party_id, data))
@@ -178,11 +150,13 @@ class InvoiceBillableWork(Wizard):
         log.debug("invoice: %s, data: %s" %( invoice, data))
 
         for (work, product) in data:
+            billable_lines = work.get_billable_timesheet_lines([work.work.id])
+
             if not work.billable_hours > 0:
                 log.debug("skip %s" % work)
                 continue
 
-            if not work.timesheet_lines:
+            if not billable_lines:
                 log.debug("skip %s" % work)
                 continue
 
@@ -190,13 +164,11 @@ class InvoiceBillableWork(Wizard):
             quantity = work.billable_hours
             unit_price = work.list_price or product.list_price
 
-            log.debug("timesheet_lines: %s" % [ x.id for x in
-                                               work.timesheet_lines] )
             linedata = dict(
                 type='line',
                 product=product.id,
                 invoice = invoice.id,
-                description = "[%s] %s" % (product.name, work.name),
+                description = "[%s] %s" % (product.name, work.rec_name),
                 quantity = work.billable_hours,
                 unit = product.default_uom.id,
                 unit_price = unit_price,
@@ -204,7 +176,7 @@ class InvoiceBillableWork(Wizard):
                 timesheet_lines = [],
             )
 
-            for timesheet_line in work.timesheet_lines:
+            for timesheet_line in billable_lines:
                 linedata['timesheet_lines'].append(('add',timesheet_line.id))
 
             account = product.get_account([product.id],'account_revenue_used')

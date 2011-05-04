@@ -1,15 +1,30 @@
 
 import logging
 
-from trytond.model import ModelView, ModelSQL, fields
+from trytond.model import ModelWorkflow, ModelView, ModelSQL, fields
 from trytond.pyson import Eval, Not, Equal, Get, In
-from trytond.transaction import Transaction
 
 log = logging.getLogger(__name__)
 
-class Invoice(ModelSQL, ModelView):
+class Invoice(ModelWorkflow, ModelSQL, ModelView):
     """Invoice"""
     _name = 'account.invoice'
+
+    timesheet_report = fields.Binary('Timesheet Report', readonly=True)
+    timesheet_report_format = fields.Char('Timesheet Report Format', readonly=True)
+
+    def __init__(self):
+        super(Invoice, self).__init__()
+        self._check_modify_exclude.append('timesheet_report')
+        self._check_modify_exclude.append('timesheet_report_format')
+
+    def copy(self, ids, default=None):
+        if default is None:
+            default={}
+        default=default.copy()
+        default['timesheet_report'] = False
+        default['timesheet_report_format'] = False
+        return super(Invoice, self).copy(ids, default)
 
     def writeoff_timesheet(self, ids, trigger_id):
         """ set timesheet lines on all invoice lines to state:billed"""
@@ -65,26 +80,6 @@ class InvoiceLine(ModelSQL, ModelView):
                                                 'currency','timesheet_lines',
                                             ]),
                              'get_amount')
-
-    def init(self, module_name):
-        super(InvoiceLine, self).init(module_name)
-        timesheet_line_obj = self.pool.get('timesheet.line')
-        m2m_obj = self.pool.get('account_invoice_line-timesheet_line')
-        lines = m2m_obj.search([('invoice_line','>','0')])
-        m2m = m2m_obj.browse(lines)
-        tuples = []
-        for line in m2m:
-            tuples.append((line.timesheet_line.id,line.invoice_line.id))
-
-        cursor = Transaction().cursor
-        for tpl in tuples:
-            cursor.execute("""
-                           UPDATE timesheet_line 
-                           SET invoice_line = %d 
-                           WHERE id = %d
-                           """ % (tpl[1], tpl[0]))
-        m2m_obj.delete(lines)
-                           
 
     def on_change_with_quantity(self, vals):
         hours = 0.0
