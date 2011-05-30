@@ -9,6 +9,29 @@ from trytond.transaction import Transaction
 log = logging.getLogger(__name__)
 
 
+class TimesheetLinesReport(Report):
+    _name='project.work.timesheet_lines_report'
+
+    def parse(self, report, objects, data, localcontext):
+        log.debug("parse %s %s %s %s" % (report, objects, data, localcontext))
+        work_obj = self.pool.get('project.work')
+        user_obj = self.pool.get('res.user')
+
+        work = objects[0]
+
+        user = user_obj.browse(Transaction().user)
+        localcontext['company'] = user.company
+        localcontext['work'] = work
+
+        if not report.report:
+            raise Exception('Error', 'Missing report file!')
+        os.chdir(os.path.dirname(__file__))
+        res = (report.extension, pagetemplate.RMLPageTemplateFile(report.report)(**localcontext))
+
+        return res
+
+TimesheetLinesReport()
+
 class InvoiceTimesheetLinesReport(Report):
     _name='account.invoice.timesheet_lines_report'
 

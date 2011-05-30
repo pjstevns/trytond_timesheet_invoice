@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>                                                                                                                                                
+<!DOCTYPE document SYSTEM "rml.dtd">
+<document filename="template.pdf"
+        xmlns:tal="http://xml.zope.org/namespaces/tal">
+	 
+	<stylesheet>
+		<blockTableStyle id="report-table">
+			<blockFont start="(0,0)" stop="(-1,0)" name="Helvetica-BoldOblique" size="10"/>
+			<blockTextColor start="(0,0)" stop="(-1,0)" colorName="#445e9c"/>
+			<blockAlignment value="CENTER" start="(0,0)" stop="(0,-1)"/>
+			<blockAlignment value="RIGHT" start="(2,0)" stop="(2,-1)"/>
+			<lineStyle start="(0,0)" stop="(-1,0)" kind="LINEBELOW" colorName="#445e9c"/>
+			<blockFont start="(0,1)" stop="(-1,-1)" name="Helvetica" size="8"/>
+			<blockTopPadding start="(0,0)" stop="(-1,-1)" length="1"/>
+		</blockTableStyle>
+		<paraStyle name="style.Title"
+			fontName="Helvetica-Bold"
+			fontSize="11"
+			align="left"
+			spaceAfter="5mm"
+			/>
+		<paraStyle name="style.Title2"
+			fontName="Helvetica-Bold"
+			fontSize="10"
+			align="left"
+			spaceBefore="5mm"
+			spaceAfter="5mm"
+			/>
+
+	</stylesheet>
+	<template pageSize="(21cm, 29cm)"
+		tal:attributes="title python:'Timesheet Report - %s' % (path('context/work/name'),)"
+		tal:define="address python:path('context/company/addresses')[0];">
+		<pageTemplate id="main">
+
+			<pageGraphics>
+				<image file="logo.png" x="12mm" y="270mm" width="43mm" height="16mm"/>
+				<setFont name="Helvetica" size="6" />
+				<fill color="#00b6e3"/>
+				<drawString x="6cm" y="20mm" tal:content="context/company/name" />
+				<fill color="#445e9c"/>
+				<drawString x="10cm" y="20mm" tal:content="address/street"/>
+				<drawString x="10cm" y="16mm" tal:content="python:'%s %s, %s' % (path('address/zip'), path('address/city'), path('address/country/code'))"/>
+				<drawString x="10cm" y="12mm" tal:content="context/company/website"/>
+				<drawString x="13cm" y="20mm" tal:content="python:'Tel. %s' % path('context/company/phone')"/>
+				<drawString x="13cm" y="16mm" tal:content="python:'Fax. %s' % path('context/company/fax')"/>
+				<drawString x="13cm" y="12mm" tal:content="context/company/email"/>
+				<drawString x="16cm" y="20mm">IBAN NL42ABNA0416148816</drawString>
+				<drawString x="16cm" y="16mm">BIC ABNANL2A</drawString>
+				<drawString x="16cm" y="12mm" tal:content="python:'VAT %s%s' %(path('context/company/vat_country'), path('context/company/vat_number'))">VAT NL811863761B01</drawString>
+
+			</pageGraphics>
+			<frame id="main" x1="3cm" y1="4cm" width="15cm" height="22cm" />
+		</pageTemplate>
+	</template>
+
+	<story>
+		<setNextTemplate name="main"/>
+		<nextFrame name="main"/>
+		
+		<para style="Title">Timesheet report project/task: <label tal:replace="context/work/name"/></para>
+
+		<blockTable colWidths="15mm,30mm,20mm,85mm" alignment="left" repeatRows="1" style="report-table">
+			<!-- table header -->
+			<tr>
+				<td>date</td>
+				<td>employee</td>
+				<td>hours</td>
+				<td>description</td>
+			</tr>  
+			<tr tal:repeat="ts_line context/work/timesheet_lines">    
+				<td tal:content="python:path('ts_line/date').strftime('%m/%d/%Y')"/>
+				<td tal:content="ts_line/employee/name"/>
+				<td tal:content="python:'%.2f' % path('ts_line/hours')"/>
+				<td tal:content="ts_line/description"/>
+			</tr>
+		</blockTable>
+	</story>
+</document>
+
+

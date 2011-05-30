@@ -105,5 +105,5 @@ data = dict(
     company=company,
 )
 
-templatefile = pagetemplate.RMLPageTemplateFile('report.pt')
+templatefile = pagetemplate.RMLPageTemplateFile('invoice-report.pt')
 open('/tmp/test-report.pdf','w').write(templatefile(**data))

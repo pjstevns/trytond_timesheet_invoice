@@ -4,7 +4,7 @@
 		<record model="ir.action.report" id="timesheet_invoice_lines_report">
 			<field name="name">Timesheet Report</field>
 			<field name="model">account.invoice</field>
-			<field name="report">report.pt</field>
+			<field name="report">invoice-report.pt</field>
 			<field name="report_name">account.invoice.timesheet_lines_report</field>
 			<field name="extension">pdf</field>
 		</record>
@@ -13,5 +13,18 @@
 			<field name="model">account.invoice,0</field>
 			<field name="action" ref="timesheet_invoice_lines_report"/>
 		</record>
+		<record model="ir.action.report" id="timesheet_lines_report">
+			<field name="name">Timesheet Report</field>
+			<field name="model">project.work</field>
+			<field name="report">work-report.pt</field>
+			<field name="report_name">project.work.timesheet_lines_report</field>
+			<field name="extension">pdf</field>
+		</record>
+		<record model="ir.action.keyword" id="timesheet_lines_report_keyword">
+			<field name="keyword">form_print</field>
+			<field name="model">project.work,0</field>
+			<field name="action" ref="timesheet_lines_report"/>
+		</record>
+
 	</data>
 </tryton>
