@@ -35,6 +35,10 @@ TimesheetLinesReport()
 class InvoiceTimesheetLinesReport(Report):
     _name='account.invoice.timesheet_lines_report'
 
+    def __init__(self):
+        super(InvoiceTimesheetLinesReport, self).__init__()
+        self._rpc['execute'] = True
+
     def parse(self, report, objects, data, localcontext):
         log.debug("parse %s %s %s %s" % (report, objects, data, localcontext))
         invoice_obj = self.pool.get('account.invoice')
