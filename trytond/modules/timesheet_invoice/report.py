@@ -5,6 +5,7 @@ import base64
 from z3c.rml import pagetemplate
 from trytond.report import Report
 from trytond.transaction import Transaction
+from trytond.pool import Pool
 
 log = logging.getLogger(__name__)
 
@@ -14,8 +15,9 @@ class TimesheetLinesReport(Report):
 
     def parse(self, report, objects, data, localcontext):
         log.debug("parse %s %s %s %s" % (report, objects, data, localcontext))
-        work_obj = self.pool.get('project.work')
-        user_obj = self.pool.get('res.user')
+        pool = Pool()
+        work_obj = pool.get('project.work')
+        user_obj = pool.get('res.user')
 
         work = objects[0]
 
@@ -41,8 +43,9 @@ class InvoiceTimesheetLinesReport(Report):
 
     def parse(self, report, objects, data, localcontext):
         log.debug("parse %s %s %s %s" % (report, objects, data, localcontext))
-        invoice_obj = self.pool.get('account.invoice')
-        user_obj = self.pool.get('res.user')
+        pool = Pool()
+        invoice_obj = pool.get('account.invoice')
+        user_obj = pool.get('res.user')
 
         invoice = objects[0]
         if invoice.timesheet_report:

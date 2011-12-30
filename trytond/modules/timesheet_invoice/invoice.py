@@ -3,6 +3,7 @@ import logging
 
 from trytond.model import ModelWorkflow, ModelView, ModelSQL, fields
 from trytond.pyson import Eval, Not, Equal, Get, In
+from trytond.pool import Pool
 
 log = logging.getLogger(__name__)
 
@@ -28,9 +29,11 @@ class Invoice(ModelWorkflow, ModelSQL, ModelView):
 
     def writeoff_timesheet(self, ids, trigger_id):
         """ set timesheet lines on all invoice lines to state:billed"""
-        invoice_obj = self.pool.get('account.invoice')
-        invoice_line_obj = self.pool.get('account.invoice.line')
-        timesheet_line_obj = self.pool.get('timesheet.line')
+
+        pool = Pool()
+        invoice_obj = pool.get('account.invoice')
+        invoice_line_obj = pool.get('account.invoice.line')
+        timesheet_line_obj = pool.get('timesheet.line')
 
         invoices = invoice_obj.browse(ids)
         for invoice in invoices:

@@ -3,6 +3,8 @@ from trytond.model import ModelView, ModelSQL, fields
 from trytond.wizard import Wizard
 from trytond.transaction import Transaction
 from trytond.backend import TableHandler
+from trytond.pool import Pool
+
 import logging
 import datetime
 
@@ -51,7 +53,7 @@ class Work(ModelSQL, ModelView):
 
     def get_billable_timesheet_lines(self, ids):
         res = {}
-        line_obj = self.pool.get('timesheet.line')
+        line_obj = Pool().get('timesheet.line')
         line_ids = line_obj.search([('work','in',ids),('billable','=',True),('billed','=',False)])
         return line_obj.browse(line_ids)
 
@@ -85,7 +87,7 @@ class InvoiceBillableWork(Wizard):
     }
 
     def _create_invoice(self, data):
-        pw_obj = self.pool.get('project.work')
+        pw_obj = Pool().get('project.work')
         invoicedata = {}
         works = pw_obj.browse(data.get('ids'))
         # find all children
@@ -119,14 +121,15 @@ class InvoiceBillableWork(Wizard):
         log.debug('party_id: %s data: %s' %(party_id, data))
         if len(data) < 1: return None
 
-        config_obj = self.pool.get('timesheet_invoice.configuration')
+        pool = Pool()
+        config_obj = pool.get('timesheet_invoice.configuration')
         config = config_obj.browse(1)
         description = config.description
 
-        party_obj = self.pool.get('party.party')
-        journal_obj = self.pool.get('account.journal')
-        invoice_obj = self.pool.get('account.invoice')
-        line_obj = self.pool.get('account.invoice.line')
+        party_obj = pool.get('party.party')
+        journal_obj = pool.get('account.journal')
+        invoice_obj = pool.get('account.invoice')
+        line_obj = pool.get('account.invoice.line')
 
         party = party_obj.browse([party_id,])[0]
         company = data[0][0].company
@@ -183,7 +186,7 @@ class InvoiceBillableWork(Wizard):
             if account: 
                 linedata['account'] = account.popitem()[1]
 
-            tax_rule_obj = self.pool.get('account.tax.rule')
+            tax_rule_obj = pool.get('account.tax.rule')
             taxes = product.get_taxes([product.id], 'customer_taxes_used')
             for tax in taxes[product.id]:
                 pattern = {}
